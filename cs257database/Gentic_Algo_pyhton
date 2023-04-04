@@ -1,0 +1,73 @@
+import random
+
+# Define the join cardinalities
+heuristics = {}
+heuristics[('Rl', 'R2')] = 1000
+heuristics[('R2', 'R3')] = 500
+heuristics[('R3', 'R4')] = 200
+heuristics[('R4', 'R5')] = 1000
+heuristics[('R5', 'R6')] = 500
+
+# Define the population size and number of generations
+pop_size = 50
+num_generations = 100
+
+# Define the genetic operators
+def crossover(parent1, parent2):
+    """
+    Performs a one-point crossover between two parents.
+    """
+    point = random.randint(1, len(parent1) - 1)
+    child = parent1[:point] + parent2[point:]
+    return child
+
+def mutation(individual):
+    """
+    Performs a random mutation on an individual.
+    """
+    point = random.randint(0, len(individual) - 1)
+    gene = individual[point]
+    new_gene = random.choice([g for g in heuristics.keys() if g != gene])
+    individual[point] = new_gene
+    return individual
+
+def selection(population):
+    """
+    Selects two parents using tournament selection.
+    """
+    tournament = random.sample(population, 2)
+    parent1, parent2 = min(tournament, key=lambda x: fitness(x))
+    return parent1, parent2
+
+# Define the fitness function
+def fitness(individual):
+    """
+    Calculates the fitness of an individual by summing the join cardinalities.
+    """
+    fitness_value = 0
+    for i in range(len(individual) - 1):
+        fitness_value += heuristics[individual[i], individual[i+1]]
+    return fitness_value
+
+# Initialize the population
+population = [random.sample(list(heuristics.keys()), len(heuristics)) for i in range(pop_size)]
+
+# Evolve the population for a fixed number of generations
+for generation in range(num_generations):
+    # Select the parents
+    parent1, parent2 = selection(population)
+    
+    # Crossover and mutation to produce the offspring
+    offspring = crossover(parent1, parent2)
+    offspring = mutation(offspring)
+    
+    # Replace the worst individual in the population with the offspring
+    worst_individual = max(population, key=lambda x: fitness(x))
+    population.remove(worst_individual)
+    population.append(offspring)
+    
+# Select the best individual in the final population
+best_individual = min(population, key=lambda x: fitness(x))
+
+# Print the optimal join ordering
+print(best_individual)
