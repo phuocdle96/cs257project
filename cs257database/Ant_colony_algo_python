@@ -1,0 +1,81 @@
+import numpy as np
+
+# Define the heuristic information (join cardinalities)
+heuristics = {}
+heuristics[('Rl', 'R2')] = 1000
+heuristics[('R2', 'R3')] = 500
+heuristics[('R3', 'R4')] = 200
+heuristics[('R4', 'R5')] = 1000
+heuristics[('R5', 'R6')] = 500
+
+# Define the pheromone trail matrix
+pheromone = np.ones((6, 6))
+
+# Define the ant colony algorithm parameters
+alpha = 1.0   # Importance of pheromone
+beta = 2.0    # Importance of heuristic information
+rho = 0.5     # Pheromone evaporation rate
+Q = 100       # Pheromone deposit quantity
+num_ants = 10 # Number of ants
+num_iterations = 100 # Number of iterations
+
+# Define the transition rule function
+def transition_rule(current_node, remaining_nodes):
+    """
+    Computes the probability of moving from the current node to each of the remaining nodes.
+    """
+    probabilities = []
+    total = 0.0
+    for node in remaining_nodes:
+        pheromone_level = pheromone[current_node, node]
+        heuristic_information = heuristics[(current_node, node)]
+        probability = pheromone_level ** alpha * heuristic_information ** beta
+        probabilities.append(probability)
+        total += probability
+    probabilities = [p / total for p in probabilities]
+    return probabilities
+
+# Define the pheromone update function
+def update_pheromone(trail, cost):
+    """
+    Updates the pheromone trail matrix using the given trail and cost.
+    """
+    for i in range(len(trail) - 1):
+        current_node = trail[i]
+        next_node = trail[i+1]
+        pheromone[current_node, next_node] = (1 - rho) * pheromone[current_node, next_node] + rho * (Q / cost)
+
+# Define the ant colony algorithm
+best_cost = float('inf')
+best_trail = []
+for iteration in range(num_iterations):
+    # Initialize the ants
+    ants = [[i] for i in range(6)]
+    for i in range(num_ants - 1):
+        ants.append([])
+    
+    # Move the ants
+    for ant in ants:
+        remaining_nodes = set(range(6)) - set(ant)
+        while remaining_nodes:
+            current_node = ant[-1]
+            probabilities = transition_rule(current_node, remaining_nodes)
+            next_node = np.random.choice(list(remaining_nodes), p=probabilities)
+            ant.append(next_node)
+            remaining_nodes.remove(next_node)
+    
+    # Compute the costs of the trails
+    costs = []
+    for ant in ants:
+        cost = 0
+        for i in range(len(ant) - 1):
+            current_node = ant[i]
+            next_node = ant[i+1]
+            cost += heuristics[(current_node, next_node)]
+        costs.append(cost)
+    
+    # Update the pheromone trail matrix
+    best_ant_index = np.argmin(costs)
+    if costs[best_ant_index] < best_cost:
+        best_cost = costs[best_ant_index]
+        best_trail = ants[best_ant_index
