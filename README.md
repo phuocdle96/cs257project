@@ -17,5 +17,5 @@ How to create the test database:
 Step 1: download imdb.tgz file from here http://homepages.cwi.nl/~boncz/job/imdb.tgz and extract imdb under join-order-benchmark
 Step 2: run createDb.py under join-order-benchmark
 
-How to run the program: run query_analysis.py under cs257database
+How to run the program: run query_analysis.py under join-order-benchmark
 
