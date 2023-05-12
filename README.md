@@ -19,3 +19,4 @@ Step 2: run createDb.py under join-order-benchmark
 
 How to run the program: run query_analysis.py under join-order-benchmark
 
+Test queries are used from join-order-benchmark of gregrahn https://github.com/gregrahn/join-order-benchmark
